@@ -3,7 +3,7 @@
 source ./prints.sh
 
 if (( $EUID != 0 )); then
-	print_err "Run this script as root!" ,
+	print_err "Run this script as root!"
 	exit 1
 fi
 
@@ -18,7 +18,9 @@ function main()
 	if [[ "$OS" -eq 1 ]]; then config_folder="/boot/firmware"; fi
 	if [[ "$OS" -eq 2 ]]; then config_folder="/firmware"; fi
 
-	print_menu "$KERNEL" "$OS"
+	while true; do
+		print_menu "$KERNEL" "$OS"
+	done
 }
 
 function remove_lcd()
@@ -33,11 +35,11 @@ function remove_lcd()
 	sudo sed -i '/^dtparam=spi=/d' $config_folder/usercfg.txt
 	echo
 
-	#sudo rm $config_folder/overlays/waveshare35a.dtbo
+	# sudo rm $config_folder/overlays/waveshare35a.dtbo
 	echo 'Press any key to return.'
 	read -n 1 c
 	echo
-	print_menu
+	return
 }
 
 function install_lcd()
@@ -53,7 +55,7 @@ function install_lcd()
 		echo 'Press any key to return.'
 		read -n 1 c
 		echo
-		print_menu
+		return
 	fi
 
 	print_inf "Enter rotation (0): "
@@ -74,7 +76,7 @@ function install_lcd()
 	echo 'Press any key to return.'
 	read -n 1 c
 	echo
-	print_menu
+	return
 }
 
 function print_lcdselection()
@@ -87,10 +89,11 @@ function print_lcdselection()
 	print_wrn "-----------------------------" ,
 	print_inf "Select: "
 	read -n 1 c
-	echo
+	echo 
 
-	if [[ "$c" -ne 2 ]]; then install_lcd $c; fi
-	if [[ "$c" -eq 2 ]]; then print_menu; fi
+	if [[ "$c" -eq 1 ]]; then install_lcd $c;
+	elif [[ "$c" -eq 2 ]]; then return;
+	else print_lcdselection; fi
 }
 
 function print_menu()
@@ -106,9 +109,9 @@ function print_menu()
 	read -n 1 c
 	echo
 
-	if [[ "$c" -eq "1" ]]; then print_lcdselection; fi
-	if [[ "$c" -eq "2" ]]; then remove_lcd; fi
-	if [[ "$c" -eq "3" ]]; then exit 0; fi
+	if [[ "$c" -eq "1" ]]; then print_lcdselection;
+	elif [[ "$c" -eq "2" ]]; then remove_lcd;
+	elif [[ "$c" -eq "3" ]]; then exit 0; fi
 }
 
 
